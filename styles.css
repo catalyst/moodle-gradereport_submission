@@ -1,0 +1,74 @@
+.path-grade-report-submission #graded_users_selector {
+    float: right;
+    margin-bottom: 5px;
+}
+
+.path-grade-report-submission .view_users_selector {
+    clear: both;
+    float: right;
+    margin-bottom: 5px;
+}
+
+.path-grade-report-submission #graded_users_selector .singleselect label,
+.path-grade-report-submission .view_users_selector .singleselect label {
+    display: inline-block;
+}
+
+.path-grade-report-submission .user-grade {
+    width: 100%;
+    border: 1px solid;
+}
+
+.path-grade-report-submission .user-grade thead th {
+    vertical-align: bottom;
+}
+
+.path-grade-report-submission .user-grade th {
+    text-align: left;
+}
+
+.path-grade-report-submission .user-grade td {
+    min-width: 4.5em;
+    vertical-align: top;
+}
+
+.path-grade-report-submission .user-grade .b1l {
+    padding: 0;
+    width: 24px;
+    min-width: 24px;
+}
+
+.path-grade-report-submission .user-grade tbody .column-itemname {
+    padding-left: 0;
+    padding-right: 8px;
+}
+
+.path-grade-report-submission .user-grade .column-itemname.item,
+.path-grade-report-submission .user-grade .gradeitemdescription {
+    font-weight: normal;
+    padding-left: 24px;
+}
+
+.path-grade-report-submission .user-grade .column-itemname.baggt,
+.path-grade-report-submission .user-grade .column-itemname.baggb {
+    padding-left: 24px;
+}
+
+.path-grade-report-submission .user-grade .baggt,
+.path-grade-report-submission .user-grade .baggb {
+    font-weight: bold;
+}
+
+.path-grade-report-submission .user-grade {
+    border: none;
+}
+.path-grade-report-submission .user-grade.generaltable .levelodd {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.path-grade-report-submission .user-grade .column-contributiontocoursetotal,
+.path-grade-report-submission .user-grade .column-range,
+.path-grade-report-submission .user-grade .column-percentage,
+.path-grade-report-submission .user-grade .column-weight {
+    /*rtl:ignore*/
+    direction: ltr;
+}
