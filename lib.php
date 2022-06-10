@@ -222,6 +222,10 @@ class grade_report_submission extends grade_report {
      */
     protected $aggregationhints = array();
 
+    protected $assigngrades = null;
+
+    protected $assignments = array();
+
     /**
      * Constructor. Sets local copies of user preferences and initialises grade_tree.
      * @param int $courseid
@@ -323,9 +327,6 @@ class grade_report_submission extends grade_report {
 
         // No groups on this report - rank is from all course users.
         $this->setup_table();
-
-        // Optionally calculate grade item averages.
-//        $this->calculate_averages();
     }
 
     /**
@@ -334,7 +335,7 @@ class grade_report_submission extends grade_report {
      * @param array $element Either the top element or, during recursion, the current element
      * @return int The number of elements processed
      */
-    function inject_rowspans(&$element) {
+    protected function inject_rowspans(&$element) {
 
         if ($element['depth'] > $this->maxdepth) {
             $this->maxdepth = $element['depth'];
@@ -419,9 +420,34 @@ class grade_report_submission extends grade_report {
             $this->tablecolumns[] = 'contributiontocoursetotal';
             $this->tableheaders[] = $this->get_lang_string('contributiontocoursetotal', 'grades');
         }
+
+        if ($this->showattemptnumber) {
+            $this->tablecolumns[] = 'attemptnumber';
+            $this->tableheaders[] = $this->get_lang_string('attemptnumber', 'gradereport_submission');
+        }
+
+        if ($this->showsubmissionstatus) {
+            $this->tablecolumns[] = 'submissionstatus';
+            $this->tableheaders[] = $this->get_lang_string('submissionstatus', 'gradereport_submission');
+        }
+
+        if ($this->showgradingstatus) {
+            $this->tablecolumns[] = 'gradingstatus';
+            $this->tableheaders[] = $this->get_lang_string('gradingstatus', 'gradereport_submission');
+        }
+
+        if ($this->showdateofgrading) {
+            $this->tablecolumns[] = 'dateofgrading';
+            $this->tableheaders[] = $this->get_lang_string('dateofgrading', 'gradereport_submission');
+        }
+
+        if ($this->showgrader) {
+            $this->tablecolumns[] = 'grader';
+            $this->tableheaders[] = $this->get_lang_string('grader', 'gradereport_submission');
+        }
     }
 
-    function fill_table() {
+    public function fill_table() {
         $this->fill_table_recursive($this->gtree->top_element);
         return true;
     }
@@ -473,7 +499,7 @@ class grade_report_submission extends grade_report {
 
             $gradegrade->load_grade_item();
 
-            /// Hidden Items
+            // Hidden Items.
             if ($gradegrade->grade_item->is_hidden()) {
                 $hidden = ' dimmed_text';
             }
@@ -506,7 +532,7 @@ class grade_report_submission extends grade_report {
             $gradeval = $gradegrade->finalgrade;
             $hint = $gradegrade->get_aggregation_hint();
             if (!$this->canviewhidden) {
-                /// Virtual Grade (may be calculated excluding hidden items etc).
+                // Virtual Grade (may be calculated excluding hidden items etc).
                 $adjustedgrade = $this->blank_hidden_total_and_adjust_bounds($this->courseid,
                                                                              $gradegrade->grade_item,
                                                                              $gradeval);
@@ -527,28 +553,20 @@ class grade_report_submission extends grade_report {
                 }
             }
 
-
             if (!$hide) {
-                /// Excluded Item
-                /**
-                if ($gradegrade->is_excluded()) {
-                    $fullname .= ' ['.get_string('excluded', 'grades').']';
-                    $excluded = ' excluded';
-                }
-                **/
                 $canviewall = has_capability('moodle/grade:viewall', $this->context);
-                /// Other class information
+                // Other class information.
                 $class .= $hidden . $excluded;
-                if ($this->switch) { // alter style based on whether aggregation is first or last
-                   $class .= ($type == 'categoryitem' or $type == 'courseitem') ? " ".$alter."d$depth baggt b2b" : " item b1b";
+                if ($this->switch) { // Alter style based on whether aggregation is first or last.
+                    $class .= ($type == 'categoryitem' or $type == 'courseitem') ? " ".$alter."d$depth baggt b2b" : " item b1b";
                 } else {
-                   $class .= ($type == 'categoryitem' or $type == 'courseitem') ? " ".$alter."d$depth baggb" : " item b1b";
+                    $class .= ($type == 'categoryitem' or $type == 'courseitem') ? " ".$alter."d$depth baggb" : " item b1b";
                 }
                 if ($type == 'categoryitem' or $type == 'courseitem') {
                     $headercat = "cat_{$gradeobject->iteminstance}_{$this->user->id}";
                 }
 
-                /// Name
+                // Name.
                 $data['itemname']['content'] = $fullname;
                 $data['itemname']['class'] = $class;
                 $data['itemname']['colspan'] = ($this->maxdepth - $depth);
@@ -568,7 +586,7 @@ class grade_report_submission extends grade_report {
                 $gradeitemdata['locked'] = $canviewall ? $gradegrade->grade_item->is_locked() : null;
 
                 if ($this->showfeedback) {
-                    // Copy $class before appending itemcenter as feedback should not be centered
+                    // Copy $class before appending itemcenter as feedback should not be centered.
                     $classfeedback = $class;
                 }
                 $class .= " itemcenter ";
@@ -576,7 +594,7 @@ class grade_report_submission extends grade_report {
                     $data['weight']['class'] = $class;
                     $data['weight']['content'] = '-';
                     $data['weight']['headers'] = "$headercat $headerrow weight";
-                    // has a weight assigned, might be extra credit
+                    // has a weight assigned, might be extra credit.
 
                     // This obliterates the weight because it provides a more informative description.
                     if (is_numeric($hint['weight'])) {
@@ -606,10 +624,12 @@ class grade_report_submission extends grade_report {
                     } else if (!empty($CFG->grade_hiddenasdate) and $gradegrade->get_datesubmitted()
                         and !$this->canviewhidden and $gradegrade->is_hidden()
                         and !$gradegrade->grade_item->is_category_item() and !$gradegrade->grade_item->is_course_item()) {
-                        // the problem here is that we do not have the time when grade value was modified, 'timemodified' is general modification date for grade_grades records
+                        // The problem here is that we do not have the time when grade value was modified,
+                        // 'timemodified' is general modification date for grade_grades records.
                         $class .= ' datesubmitted';
                         $data['grade']['class'] = $class;
-                        $data['grade']['content'] = get_string('submittedon', 'grades', userdate($gradegrade->get_datesubmitted(), get_string('strftimedatetimeshort')));
+                        $data['grade']['content'] = get_string('submittedon', 'grades',
+                            userdate($gradegrade->get_datesubmitted(), get_string('strftimedatetimeshort')));
                         $gradeitemdata['gradehiddenbydate'] = true;
                     } else if ($gradegrade->is_hidden()) {
                         $data['grade']['class'] = $class.' dimmed_text';
@@ -632,7 +652,7 @@ class grade_report_submission extends grade_report {
                     $gradeitemdata['gradeformatted'] = $data['grade']['content'];
                 }
 
-                // Range
+                // Range.
                 if ($this->showrange) {
                     $data['range']['class'] = $class;
                     $data['range']['content'] = $gradegrade->grade_item->get_formatted_range(GRADE_DISPLAY_TYPE_REAL, $this->rangedecimals);
@@ -643,7 +663,7 @@ class grade_report_submission extends grade_report {
                     $gradeitemdata['grademax'] = $gradegrade->grade_item->grademax;
                 }
 
-                // Percentage
+                // Percentage.
                 if ($this->showpercentage) {
                     if ($gradegrade->grade_item->needsupdate) {
                         $data['percentage']['class'] = $class.' gradingerror';
@@ -652,17 +672,19 @@ class grade_report_submission extends grade_report {
                         $data['percentage']['class'] = $class.' dimmed_text';
                         $data['percentage']['content'] = '-';
                         if ($this->canviewhidden) {
-                            $data['percentage']['content'] = grade_format_gradevalue($gradeval, $gradegrade->grade_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE);
+                            $data['percentage']['content'] = grade_format_gradevalue($gradeval,
+                                $gradegrade->grade_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE);
                         }
                     } else {
                         $data['percentage']['class'] = $class;
-                        $data['percentage']['content'] = grade_format_gradevalue($gradeval, $gradegrade->grade_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE);
+                        $data['percentage']['content'] = grade_format_gradevalue($gradeval,
+                            $gradegrade->grade_item, true, GRADE_DISPLAY_TYPE_PERCENTAGE);
                     }
                     $data['percentage']['headers'] = "$headercat $headerrow percentage";
                     $gradeitemdata['percentageformatted'] = $data['percentage']['content'];
                 }
 
-                // Lettergrade
+                // Lettergrade.
                 if ($this->showlettergrade) {
                     if ($gradegrade->grade_item->needsupdate) {
                         $data['lettergrade']['class'] = $class.' gradingerror';
@@ -682,22 +704,22 @@ class grade_report_submission extends grade_report {
                     $gradeitemdata['lettergradeformatted'] = $data['lettergrade']['content'];
                 }
 
-                // Rank
+                // Rank.
                 if ($this->showrank) {
                     $gradeitemdata['rank'] = 0;
                     if ($gradegrade->grade_item->needsupdate) {
                         $data['rank']['class'] = $class.' gradingerror';
                         $data['rank']['content'] = get_string('error');
-                        } elseif ($gradegrade->is_hidden()) {
+                    } else if ($gradegrade->is_hidden()) {
                             $data['rank']['class'] = $class.' dimmed_text';
                             $data['rank']['content'] = '-';
                     } else if (is_null($gradeval)) {
-                        // no grade, no rank
+                        // No grade, no rank.
                         $data['rank']['class'] = $class;
                         $data['rank']['content'] = '-';
 
                     } else {
-                        /// find the number of users with a higher grade
+                        // Find the number of users with a higher grade.
                         $sql = "SELECT COUNT(DISTINCT(userid))
                                   FROM {grade_grades}
                                  WHERE finalgrade > ?
@@ -715,7 +737,7 @@ class grade_report_submission extends grade_report {
                     $data['rank']['headers'] = "$headercat $headerrow rank";
                 }
 
-                // Average
+                // Average.
                 if ($this->showaverage) {
                     $gradeitemdata['averageformatted'] = '';
 
@@ -729,7 +751,7 @@ class grade_report_submission extends grade_report {
                     $data['average']['headers'] = "$headercat $headerrow average";
                 }
 
-                // Feedback
+                // Feedback.
                 if ($this->showfeedback) {
                     $gradeitemdata['feedback'] = '';
                     $gradeitemdata['feedbackformat'] = $gradegrade->feedbackformat;
@@ -746,7 +768,7 @@ class grade_report_submission extends grade_report {
                     }
 
                     if ($gradegrade->overridden > 0 AND ($type == 'categoryitem' OR $type == 'courseitem')) {
-                    $data['feedback']['class'] = $classfeedback.' feedbacktext';
+                        $data['feedback']['class'] = $classfeedback.' feedbacktext';
                         $data['feedback']['content'] = get_string('overridden', 'grades').': ' .
                             format_text($gradegrade->feedback, $gradegrade->feedbackformat,
                                 ['context' => $gradegrade->get_context()]);
@@ -770,6 +792,67 @@ class grade_report_submission extends grade_report {
 
                 }
                 $this->gradeitemsdata[] = $gradeitemdata;
+
+                // These Options for mod_assign only.
+                if ($gradeobject->itemmodule === 'assign') {
+                    // Load assign grades.
+                    $assigmentid = $gradeobject->iteminstance;
+                    $assigngrade = $this->get_assign_grade($assigmentid);
+                    $assignment = $this->get_assignment($assigmentid);
+                    if ($assigngrade) {
+                        // Attempt number.
+                        if ($this->showattemptnumber) {
+                            $attemptnumber = isset($assigngrade) ? $assigngrade->attemptnumber + 1 : '-';
+                            $data['attemptnumber']['class'] = $class;
+                            $data['attemptnumber']['content'] = $attemptnumber;
+                        }
+
+                        // Submission status.
+                        if ($this->showsubmissionstatus) {
+                            $submissionstatus = isset($assigngrade) ? $assigngrade->submissionstatus : '-';
+                            $data['submissionstatus']['class'] = $class;
+                            $data['submissionstatus']['content'] = get_string('submissionstatus_' . $submissionstatus, 'assign');
+                        }
+
+                        // Grading status.
+                        if ($this->showgradingstatus) {
+                            $gradingstatus = $assignment->get_grading_status($this->user->id);
+                            $data['gradingstatus']['class'] = $class;
+                            $data['gradingstatus']['content'] = get_string('markingworkflowstate' . $gradingstatus, 'assign');;
+                        }
+
+                        // Date of grading.
+                        if ($this->showdateofgrading) {
+                            $data['dateofgrading']['class'] = $class;
+                            $data['dateofgrading']['content'] = userdate($assigngrade->dategraded, get_string('strftimedatetimeshort'));
+                        }
+
+                        // Grader.
+                        if ($this->showgrader) {
+                            $gradingstatus = $assignment->get_grading_status($this->user->id);
+                            $grader = null;
+                            $context = context_module::instance($cm->id);
+                            // Only display the grader if it is in the right state.
+                            if (in_array($gradingstatus, [ASSIGN_GRADING_STATUS_GRADED, ASSIGN_MARKING_WORKFLOW_STATE_RELEASED])) {
+                                if (isset($assigngrade->grader) && $assigngrade->grader > 0) {
+                                    $grader = $DB->get_record('user', array('id' => $assigngrade->grader));
+                                } else if (isset($gradegrade->usermodified)
+                                    && $gradegrade->usermodified > 0
+                                    && has_capability('mod/assign:grade', $context, $gradegrade->usermodified)) {
+                                    // Grader not provided. Check that usermodified is a user who can grade.
+                                    // Case 1: When an assignment is reopened an empty assign_grade is created so the feedback
+                                    // plugin can know which attempt it's referring to. In this case, usermodifed is a student.
+                                    // Case 2: When an assignment's grade is overrided via the gradebook, usermodified is a grader
+                                    $grader = $DB->get_record('user', array('id' => $gradegrade->usermodified));
+                                }
+                            }
+
+                            $viewfullnames = has_capability('moodle/site:viewfullnames', $context);
+                            $data['grader']['class'] = $class;
+                            $data['grader']['content'] = isset($grader) ? fullname($grader, $viewfullnames) : '-';
+                        }
+                    }
+                }
             }
             // We collect the aggregation hints whether they are hidden or not.
             if ($this->showcontributiontocoursetotal) {
@@ -785,15 +868,15 @@ class grade_report_submission extends grade_report {
             }
         }
 
-        /// Category
+        // Category.
         if ($type == 'category') {
             $data['leader']['class'] = $class.' '.$alter."d$depth b1t b2b b1l";
             $data['leader']['rowspan'] = $element['rowspan'];
 
             if ($this->switch) { // alter style based on whether aggregation is first or last
-               $data['itemname']['class'] = $class.' '.$alter."d$depth b1b b1t";
+                $data['itemname']['class'] = $class.' ' .$alter."d$depth b1b b1t";
             } else {
-               $data['itemname']['class'] = $class.' '.$alter."d$depth b2t";
+                $data['itemname']['class'] = $class.' '.$alter."d$depth b2t";
             }
             $data['itemname']['colspan'] = ($this->maxdepth - $depth + count($this->tablecolumns) - 1);
             $data['itemname']['content'] = $fullname;
@@ -801,13 +884,13 @@ class grade_report_submission extends grade_report {
             $data['itemname']['id'] = "cat_{$gradeobject->id}_{$this->user->id}";
         }
 
-        /// Add this row to the overall system
+        // Add this row to the overall system.
         foreach ($data as $key => $celldata) {
             $data[$key]['class'] .= ' column-' . $key;
         }
         $this->tabledata[] = $data;
 
-        /// Recursively iterate through all child elements
+        // Recursively iterate through all child elements.
         if (isset($element['children'])) {
             foreach ($element['children'] as $key => $child) {
                 $this->fill_table_recursive($element['children'][$key]);
@@ -918,7 +1001,7 @@ class grade_report_submission extends grade_report {
     public function print_table($return=false) {
          $maxspan = $this->maxdepth;
 
-        /// Build table structure
+        // Build table structure.
         $html = "
             <table cellspacing='0'
                    cellpadding='0'
@@ -937,7 +1020,7 @@ class grade_report_submission extends grade_report {
             </thead>
             <tbody>\n";
 
-        /// Print out the table data
+        // Print out the table data.
         for ($i = 0; $i < count($this->tabledata); $i++) {
             $html .= "<tr>\n";
             if (isset($this->tabledata[$i]['leader'])) {
@@ -1035,10 +1118,10 @@ class grade_report_submission extends grade_report {
                        $groupwheresql
                   GROUP BY gg.itemid";
 
-            $sum_array = array();
+            $sumarray = array();
             $sums = $DB->get_recordset_sql($sql, $params);
             foreach ($sums as $itemid => $csum) {
-                $sum_array[$itemid] = $csum->sum;
+                $sumarray[$itemid] = $csum->sum;
             }
             $sums->close();
 
@@ -1068,7 +1151,7 @@ class grade_report_submission extends grade_report {
 
             $ungradedcounts = $DB->get_records_sql($sql, $params);
 
-            foreach ($this->gtree->items as $itemid=>$unused) {
+            foreach ($this->gtree->items as $itemid => $unused) {
                 if (!empty($this->gtree->items[$itemid]->avg)) {
                     continue;
                 }
@@ -1079,22 +1162,22 @@ class grade_report_submission extends grade_report {
                     continue;
                 }
 
-                if (empty($sum_array[$item->id])) {
-                    $sum_array[$item->id] = 0;
+                if (empty($sumarray[$item->id])) {
+                    $sumarray[$item->id] = 0;
                 }
 
                 if (empty($ungradedcounts[$itemid])) {
-                    $ungraded_count = 0;
+                    $ungradedcount = 0;
                 } else {
-                    $ungraded_count = $ungradedcounts[$itemid]->count;
+                    $ungradedcount = $ungradedcounts[$itemid]->count;
                 }
 
-                //do they want the averages to include all grade items
+                // Do they want the averages to include all grade items.
                 if ($meanselection == GRADE_REPORT_MEAN_GRADED) {
-                    $mean_count = $totalcount - $ungraded_count;
+                    $meancount = $totalcount - $ungradedcount;
                 } else { // Bump up the sum by the number of ungraded items * grademin.
-                    $sum_array[$item->id] += ($ungraded_count * $item->grademin);
-                    $mean_count = $totalcount;
+                    $sumarray[$item->id] += ($ungradedcount * $item->grademin);
+                    $meancount = $totalcount;
                 }
 
                 // Determine which display type to use for this average.
@@ -1115,16 +1198,16 @@ class grade_report_submission extends grade_report {
                     $decimalpoints = $averagesdecimalpoints;
                 }
 
-                if (empty($sum_array[$item->id]) || $mean_count == 0) {
+                if (empty($sumarray[$item->id]) || $meancount == 0) {
                     $this->gtree->items[$itemid]->avg = '-';
                 } else {
-                    $sum = $sum_array[$item->id];
-                    $avgradeval = $sum/$mean_count;
+                    $sum = $sumarray[$item->id];
+                    $avgradeval = $sum / $meancount;
                     $gradehtml = grade_format_gradevalue($avgradeval, $item, true, $displaytype, $decimalpoints);
 
                     $numberofgrades = '';
                     if ($shownumberofgrades) {
-                        $numberofgrades = " ($mean_count)";
+                        $numberofgrades = " ($meancount)";
                     }
 
                     $this->gtree->items[$itemid]->avg = $gradehtml.$numberofgrades;
@@ -1147,6 +1230,57 @@ class grade_report_submission extends grade_report {
             )
         );
         $event->trigger();
+    }
+
+    protected function get_assign_grade($assignmentid) {
+        global $DB;
+
+        if (is_null($this->assigngrades)) {
+            $assigngrades = array();
+            $rows = $DB->get_recordset_sql('
+                    SELECT s.assignment AS assignmentid,
+                           s.userid AS userid,
+                           s.attemptnumber,
+                           s.status AS submissionstatus,
+                           s.timemodified as datesubmitted,
+                           g.grade as rawgrade,
+                           g.timemodified as dategraded,
+                           g.grader as grader
+                      FROM mdl_assign a
+                      JOIN mdl_assign_submission s
+                           ON s.assignment = a.id
+                           AND s.latest = 1
+                      JOIN mdl_assign_grades g
+                           ON g.assignment = s.assignment
+                           AND s.userid = g.userid
+                           AND g.attemptnumber = s.attemptnumber
+                     WHERE s.latest = 1 AND s.userid = :userid AND a.course = :courseid',
+                ['userid' => $this->user->id, 'courseid' => $this->courseid]);
+            foreach ($rows as $row) {
+                $assigngrades[$row->assignmentid] = $row;
+            }
+            $rows->close();
+            $this->assigngrades = $assigngrades;
+        }
+        return $this->assigngrades[$assignmentid] ?? null;
+    }
+
+    protected function get_assignment($assignmentid) {
+        if (empty($this->assignments[$assignmentid])) {
+            global $CFG, $DB;
+            require_once($CFG->dirroot . '/mod/assign/locallib.php');
+            $instances = $this->modinfo->get_instances_of('assign');
+            $cm = $instances[$assignmentid];
+            $dbparams = array('id' => $assignmentid);
+            $assign = $DB->get_record('assign', $dbparams);
+            $assign->cmidnumber = $cm->idnumber;
+            $cm = get_coursemodule_from_instance('assign', $assign->id, 0, false, MUST_EXIST);
+            $context = context_module::instance($cm->id);
+            $assignment = new assign($context, null, null);
+            $assignment->set_instance($assign);
+            $this->assignments[$assignmentid] = $assignment;
+        }
+        return $this->assignments[$assignmentid];
     }
 }
 
@@ -1221,7 +1355,8 @@ function grade_report_submission_settings_definition(&$mform) {
         $options[-1] = get_string('defaultprev', 'grades', $options[$CFG->grade_report_submission_showcontributiontocoursetotal]);
     }
 
-    $mform->addElement('select', 'report_submission_showcontributiontocoursetotal', get_string('showcontributiontocoursetotal', 'grades'), $options);
+    $mform->addElement('select', 'report_submission_showcontributiontocoursetotal',
+        get_string('showcontributiontocoursetotal', 'grades'), $options);
     $mform->addHelpButton('report_submission_showcontributiontocoursetotal', 'showcontributiontocoursetotal', 'grades');
 
     if (empty($CFG->grade_report_submission_showrange)) {
@@ -1238,7 +1373,8 @@ function grade_report_submission_settings_definition(&$mform) {
         $options[-1] = get_string('defaultprev', 'grades', $options[1]);
     }
 
-    $mform->addElement('select', 'report_submission_showattemptnumber', get_string('showattemptnumber', 'gradereport_submission'), $options);
+    $mform->addElement('select', 'report_submission_showattemptnumber',
+        get_string('showattemptnumber', 'gradereport_submission'), $options);
 
     if (empty($CFG->grade_report_submission_showsubmissionstatus)) {
         $options[-1] = get_string('defaultprev', 'grades', $options[0]);
@@ -1246,7 +1382,8 @@ function grade_report_submission_settings_definition(&$mform) {
         $options[-1] = get_string('defaultprev', 'grades', $options[1]);
     }
 
-    $mform->addElement('select', 'report_submission_showsubmissionstatus', get_string('showsubmissionstatus', 'gradereport_submission'), $options);
+    $mform->addElement('select', 'report_submission_showsubmissionstatus',
+        get_string('showsubmissionstatus', 'gradereport_submission'), $options);
 
     if (empty($CFG->grade_report_submission_showgradingstatus)) {
         $options[-1] = get_string('defaultprev', 'grades', $options[0]);
@@ -1254,7 +1391,8 @@ function grade_report_submission_settings_definition(&$mform) {
         $options[-1] = get_string('defaultprev', 'grades', $options[1]);
     }
 
-    $mform->addElement('select', 'report_submission_showgradingstatus', get_string('showgradingstatus', 'gradereport_submission'), $options);
+    $mform->addElement('select', 'report_submission_showgradingstatus',
+        get_string('showgradingstatus', 'gradereport_submission'), $options);
 
     if (empty($CFG->grade_report_submission_showdateofgrading)) {
         $options[-1] = get_string('defaultprev', 'grades', $options[0]);
@@ -1262,7 +1400,8 @@ function grade_report_submission_settings_definition(&$mform) {
         $options[-1] = get_string('defaultprev', 'grades', $options[1]);
     }
 
-    $mform->addElement('select', 'report_submission_showdateofgrading', get_string('showdateofgrading', 'gradereport_submission'), $options);
+    $mform->addElement('select', 'report_submission_showdateofgrading',
+        get_string('showdateofgrading', 'gradereport_submission'), $options);
 
     if (empty($CFG->grade_report_submission_showgrader)) {
         $options[-1] = get_string('defaultprev', 'grades', $options[0]);
@@ -1292,7 +1431,7 @@ function grade_report_submission_settings_definition(&$mform) {
     $mform->addElement('select', 'report_submission_showhiddenitems', get_string('showhiddenitems', 'grades'), $options);
     $mform->addHelpButton('report_submission_showhiddenitems', 'showhiddenitems', 'grades');
 
-    //showtotalsifcontainhidden
+    // Showtotalsifcontainhidden.
     $options = array(-1 => get_string('default', 'grades'),
                       GRADE_REPORT_HIDE_TOTAL_IF_CONTAINS_HIDDEN => get_string('hide'),
                       GRADE_REPORT_SHOW_TOTAL_IF_CONTAINS_HIDDEN => get_string('hidetotalshowexhiddenitems', 'grades'),
@@ -1322,8 +1461,8 @@ function grade_report_submission_profilereport($course, $user, $viewasuser = fal
 
         $context = context_course::instance($course->id);
 
-        /// return tracking object
-        $gpr = new grade_plugin_return(array('type' => 'report', 'plugin'=>'user', 'courseid'=>$course->id, 'userid'=>$user->id));
+        // Return tracking object.
+        $gpr = new grade_plugin_return(array('type' => 'report', 'plugin' => 'user', 'courseid' => $course->id, 'userid' => $user->id));
         // Create a report instance
         $report = new grade_report_submission($course->id, $gpr, $context, $user->id, $viewasuser);
 

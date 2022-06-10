@@ -25,6 +25,10 @@
 
 $string['eventgradereportviewed'] = 'Grade submission report viewed';
 $string['pluginname'] = 'Grade and Submissions report';
+$string['attemptnumber'] = 'Attempt number';
+$string['dateofgrading'] = 'Date of grading';
+$string['grader'] = 'Grader';
+$string['gradingstatus'] = 'Grading status';
 $string['myself'] = 'Myself';
 $string['otheruser'] = 'User';
 $string['privacy:metadata:preference:gradereport_submission_view_user'] = 'Whether to view report as current user or another user in the gradebook reports';
@@ -38,6 +42,7 @@ $string['showdateofgrading'] = 'Show date of grading';
 $string['showdateofgrading_help'] = 'Whether to show date of grading.';
 $string['showgrader'] = 'Show grader';
 $string['showgrader_help'] = 'Whether to show grader.';
+$string['submissionstatus'] = 'Submission status';
 $string['submission:view'] = 'View your own grade report';
 $string['tablesummary'] = 'The table is arranged as a list of graded items including categories of graded items. When items are in a category they will be indicated as such.';
 $string['viewas'] = 'View report as';
