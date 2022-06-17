@@ -227,15 +227,20 @@ class externallib_test extends externallib_advanced_testcase {
         // A teacher must see all student grades (in their group only).
         $this->setUser($teacher);
 
-        grade_set_setting($course->id, 'report_user_showrank', 1);
-        grade_set_setting($course->id, 'report_user_showpercentage', 1);
-        grade_set_setting($course->id, 'report_user_showhiddenitems', 1);
-        grade_set_setting($course->id, 'report_user_showgrade', 1);
-        grade_set_setting($course->id, 'report_user_showfeedback', 1);
-        grade_set_setting($course->id, 'report_user_showweight', 1);
-        grade_set_setting($course->id, 'report_user_showcontributiontocoursetotal', 1);
-        grade_set_setting($course->id, 'report_user_showlettergrade', 1);
-        grade_set_setting($course->id, 'report_user_showaverage', 1);
+        grade_set_setting($course->id, 'report_submission_showrank', 1);
+        grade_set_setting($course->id, 'report_submission_showpercentage', 1);
+        grade_set_setting($course->id, 'report_submission_showhiddenitems', 1);
+        grade_set_setting($course->id, 'report_submission_showgrade', 1);
+        grade_set_setting($course->id, 'report_submission_showfeedback', 1);
+        grade_set_setting($course->id, 'report_submission_showweight', 1);
+        grade_set_setting($course->id, 'report_submission_showcontributiontocoursetotal', 1);
+        grade_set_setting($course->id, 'report_submission_showlettergrade', 1);
+        grade_set_setting($course->id, 'report_submission_showaverage', 1);
+        grade_set_setting($course->id, 'report_submission_showattemptnumber', 1);
+        grade_set_setting($course->id, 'report_submission_showsubmissionstatus', 1);
+        grade_set_setting($course->id, 'report_submission_showgradingstatus', 1);
+        grade_set_setting($course->id, 'report_submission_showdateofgrading', 1);
+        grade_set_setting($course->id, 'report_submission_showgrader', 1);
 
         $studentgrades = gradereport_submission_external::get_grade_items($course->id);
         $studentgrades = \external_api::clean_returnvalue(gradereport_submission_external::get_grade_items_returns(),
@@ -325,14 +330,19 @@ class externallib_test extends externallib_advanced_testcase {
 
         list($course, $teacher, $student1, $student2, $assignment) = $this->load_data($s1grade, $s2grade);
 
-        grade_set_setting($course->id, 'report_user_showrank', 1);
-        grade_set_setting($course->id, 'report_user_showpercentage', 1);
-        grade_set_setting($course->id, 'report_user_showgrade', 1);
-        grade_set_setting($course->id, 'report_user_showfeedback', 1);
-        grade_set_setting($course->id, 'report_user_showweight', 1);
-        grade_set_setting($course->id, 'report_user_showcontributiontocoursetotal', 1);
-        grade_set_setting($course->id, 'report_user_showlettergrade', 1);
-        grade_set_setting($course->id, 'report_user_showaverage', 1);
+        grade_set_setting($course->id, 'report_submission_showrank', 1);
+        grade_set_setting($course->id, 'report_submission_showpercentage', 1);
+        grade_set_setting($course->id, 'report_submission_showgrade', 1);
+        grade_set_setting($course->id, 'report_submission_showfeedback', 1);
+        grade_set_setting($course->id, 'report_submission_showweight', 1);
+        grade_set_setting($course->id, 'report_submission_showcontributiontocoursetotal', 1);
+        grade_set_setting($course->id, 'report_submission_showlettergrade', 1);
+        grade_set_setting($course->id, 'report_submission_showaverage', 1);
+        grade_set_setting($course->id, 'report_submission_showattemptnumber', 1);
+        grade_set_setting($course->id, 'report_submission_showsubmissionstatus', 1);
+        grade_set_setting($course->id, 'report_submission_showgradingstatus', 1);
+        grade_set_setting($course->id, 'report_submission_showdateofgrading', 1);
+        grade_set_setting($course->id, 'report_submission_showgrader', 1);
 
         $this->setUser($student1);
 
@@ -348,7 +358,6 @@ class externallib_test extends externallib_advanced_testcase {
 
         $this->assertEquals($course->id, $studentgrades['usergrades'][0]['courseid']);
         $this->assertEquals($student1->id, $studentgrades['usergrades'][0]['userid']);
-        $this->assertEquals($student1->idnumber, $studentgrades['usergrades'][0]['useridnumber']);
         $this->assertEquals($assignment->name, $studentgrades['usergrades'][0]['gradeitems'][0]['itemname']);
         $this->assertEquals('mod', $studentgrades['usergrades'][0]['gradeitems'][0]['itemtype']);
         $this->assertEquals('assign', $studentgrades['usergrades'][0]['gradeitems'][0]['itemmodule']);
@@ -374,10 +383,6 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals(1, $studentgrades['usergrades'][0]['gradeitems'][0]['rank']);
         $this->assertEquals(2, $studentgrades['usergrades'][0]['gradeitems'][0]['numusers']);
         $this->assertEquals(70, $studentgrades['usergrades'][0]['gradeitems'][0]['averageformatted']);
-
-        // Check that the idnumber for assignment grades is equal to the cmid.
-        $this->assertEquals((string) $studentgrades['usergrades'][0]['gradeitems'][0]['cmid'],
-            $studentgrades['usergrades'][0]['gradeitems'][0]['idnumber']);
 
         // Hide one grade for the user.
         $gradegrade = new \grade_grade(array('userid' => $student1->id,
