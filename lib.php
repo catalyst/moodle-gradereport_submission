@@ -798,6 +798,41 @@ class grade_report_submission extends grade_report {
 
                 }
 
+                // Default value for attempt number.
+                if ($this->showattemptnumber) {
+                    $data['attemptnumber']['class'] = $class;
+                    $data['attemptnumber']['content'] = '-';
+                    $gradeitemdata['attemptnumber'] = '-';
+                }
+
+                // Default value for submission status.
+                if ($this->showsubmissionstatus) {
+                    $data['submissionstatus']['class'] = $class;
+                    $data['submissionstatus']['content'] = '-';
+                    $gradeitemdata['submissionstatus'] = '-';
+                }
+
+                // Default value for grading status.
+                if ($this->showgradingstatus) {
+                    $data['gradingstatus']['class'] = $class;
+                    $data['gradingstatus']['content'] = '-';
+                    $gradeitemdata['gradingstatus'] = '-';
+                }
+
+                // Default value for date of grading.
+                if ($this->showdateofgrading) {
+                    $data['dateofgrading']['class'] = $class;
+                    $data['dateofgrading']['content'] = '-';
+                    $gradeitemdata['dateofgrading'] = '-';
+                }
+
+                // Default value for grader.
+                if ($this->showgrader) {
+                    $data['grader']['class'] = $class;
+                    $data['grader']['content'] = '-';
+                    $gradeitemdata['grader'] = '-';
+                }
+
                 // These Options for mod_assign only.
                 if ($gradeobject->itemmodule === 'assign') {
                     // Load assign grades.
@@ -808,7 +843,6 @@ class grade_report_submission extends grade_report {
                         // Attempt number.
                         if ($this->showattemptnumber) {
                             $attemptnumber = isset($assigngrade) ? $assigngrade->attemptnumber + 1 : '-';
-                            $data['attemptnumber']['class'] = $class;
                             $data['attemptnumber']['content'] = $attemptnumber;
                             $gradeitemdata['attemptnumber'] = $attemptnumber;
                         }
@@ -816,7 +850,6 @@ class grade_report_submission extends grade_report {
                         // Submission status.
                         if ($this->showsubmissionstatus) {
                             $submissionstatus = isset($assigngrade) ? $assigngrade->submissionstatus : '-';
-                            $data['submissionstatus']['class'] = $class;
                             $data['submissionstatus']['content'] = get_string('submissionstatus_' . $submissionstatus, 'assign');
                             $gradeitemdata['submissionstatus'] = get_string('submissionstatus_' . $submissionstatus, 'assign');
                         }
@@ -824,7 +857,6 @@ class grade_report_submission extends grade_report {
                         // Grading status.
                         if ($this->showgradingstatus) {
                             $gradingstatus = $assignment->get_grading_status($this->user->id);
-                            $data['gradingstatus']['class'] = $class;
                             if ($assignment->get_instance()->markingworkflow) {
                                 $data['gradingstatus']['content'] = get_string('markingworkflowstate' . $gradingstatus, 'assign');
                                 $gradeitemdata['gradingstatus'] = get_string('markingworkflowstate' . $gradingstatus, 'assign');
@@ -836,11 +868,13 @@ class grade_report_submission extends grade_report {
 
                         // Date of grading.
                         if ($this->showdateofgrading) {
-                            $data['dateofgrading']['class'] = $class;
-                            $data['dateofgrading']['content'] = userdate($assigngrade->dategraded,
-                                get_string('strftimedatetimeshort'));
-                            $gradeitemdata['dateofgrading'] = userdate($assigngrade->dategraded,
-                                get_string('strftimedatetimeshort'));
+                            $dateofgrading = $assigngrade->dategraded;
+                            if (!empty($dateofgrading)) {
+                                $data['dateofgrading']['content'] = userdate($assigngrade->dategraded,
+                                        get_string('strftimedatetimeshort'));
+                                $gradeitemdata['dateofgrading'] = userdate($assigngrade->dategraded,
+                                        get_string('strftimedatetimeshort'));
+                            }
                         }
 
                         // Grader.
@@ -864,7 +898,6 @@ class grade_report_submission extends grade_report {
                             }
 
                             $viewfullnames = has_capability('moodle/site:viewfullnames', $context);
-                            $data['grader']['class'] = $class;
                             $data['grader']['content'] = isset($grader) ? fullname($grader, $viewfullnames) : '-';
                             $gradeitemdata['grader'] = isset($grader) ? fullname($grader, $viewfullnames) : '-';
                         }
@@ -1051,7 +1084,7 @@ class grade_report_submission extends grade_report {
             }
             for ($j = 0; $j < count($this->tablecolumns); $j++) {
                 $name = $this->tablecolumns[$j];
-                $data = $this->tabledata[$i][$name];
+                $data = $this->tabledata[$i][$name] ?? null;
                 $class = $data['class'] ?? '';
                 $colspan = (isset($data['colspan'])) ? "colspan='".$data['colspan']."'" : '';
                 $content = (isset($data['content'])) ? $data['content'] : null;
@@ -1542,8 +1575,8 @@ function gradereport_submission_myprofile_navigation(core_user\output\myprofile\
             }
         }
         if ($gradeaccess) {
-            $url = new moodle_url('/course/user.php', array('mode' => 'grade', 'id' => $course->id, 'user' => $user->id));
-            $node = new core_user\output\myprofile\node('reports', 'grade', get_string('grade'), null, $url);
+            $url = new moodle_url('/grade/report/submission/index.php', array('id' => $course->id, 'user' => $user->id));
+            $node = new core_user\output\myprofile\node('reports', 'submission', get_string('pluginname', 'gradereport_submission'), null, $url);
             $tree->add_node($node);
         }
     }
