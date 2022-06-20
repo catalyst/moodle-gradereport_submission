@@ -25,6 +25,7 @@ global $CFG;
 
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 require_once($CFG->dirroot . '/grade/report/submission/externallib.php');
+require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
 
 /**
  * User grade report functions unit tests
@@ -72,7 +73,16 @@ class externallib_test extends externallib_advanced_testcase {
         $modcontext = get_coursemodule_from_instance('assign', $assignment->id, $course->id);
         $assignment->cmidnumber = $modcontext->id;
 
-        $student1grade = array('userid' => $student1->id, 'rawgrade' => $s1grade, 'idnumber' => 'testidnumber1');
+        $context = \context_module::instance($modcontext->id);
+        $assign = new \mod_assign_testable_assign($context, $modcontext, $course);
+
+        // Simulate a submission.
+        $this->setUser($student1->id);
+        $submission = $assign->get_user_submission($student1->id, true);
+        $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
+        $assign->testable_update_submission($submission, $student1->id, true, false);
+
+        $student1grade = array('userid' => $student1->id, 'rawgrade' => $s1grade, 'idnumber' => 'testidnumber1', 'dategraded' => time());
         $student2grade = array('userid' => $student2->id, 'rawgrade' => $s2grade, 'idnumber' => 'testidnumber2');
         $studentgrades = array($student1->id => $student1grade, $student2->id => $student2grade);
         assign_grade_item_update($assignment, $studentgrades);
@@ -280,6 +290,11 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals(1, $studentgrades['usergrades'][0]['gradeitems'][0]['rank']);
         $this->assertEquals(2, $studentgrades['usergrades'][0]['gradeitems'][0]['numusers']);
         $this->assertEquals(70, $studentgrades['usergrades'][0]['gradeitems'][0]['averageformatted']);
+        $this->assertEquals(1, $studentgrades['usergrades'][0]['gradeitems'][0]['attemptnumber']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['submissionstatus']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['gradingstatus']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['dateofgrading']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['grader']);
 
         // Course grades.
         $this->assertEquals('course', $studentgrades['usergrades'][0]['gradeitems'][1]['itemtype']);
@@ -383,6 +398,11 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals(1, $studentgrades['usergrades'][0]['gradeitems'][0]['rank']);
         $this->assertEquals(2, $studentgrades['usergrades'][0]['gradeitems'][0]['numusers']);
         $this->assertEquals(70, $studentgrades['usergrades'][0]['gradeitems'][0]['averageformatted']);
+        $this->assertEquals(1, $studentgrades['usergrades'][0]['gradeitems'][0]['attemptnumber']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['submissionstatus']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['gradingstatus']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['dateofgrading']);
+        $this->assertNotEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['grader']);
 
         // Hide one grade for the user.
         $gradegrade = new \grade_grade(array('userid' => $student1->id,

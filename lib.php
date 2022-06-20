@@ -797,7 +797,6 @@ class grade_report_submission extends grade_report {
                     $data['contributiontocoursetotal']['headers'] = "$headercat $headerrow contributiontocoursetotal";
 
                 }
-                $this->gradeitemsdata[] = $gradeitemdata;
 
                 // These Options for mod_assign only.
                 if ($gradeobject->itemmodule === 'assign') {
@@ -811,6 +810,7 @@ class grade_report_submission extends grade_report {
                             $attemptnumber = isset($assigngrade) ? $assigngrade->attemptnumber + 1 : '-';
                             $data['attemptnumber']['class'] = $class;
                             $data['attemptnumber']['content'] = $attemptnumber;
+                            $gradeitemdata['attemptnumber'] = $attemptnumber;
                         }
 
                         // Submission status.
@@ -818,19 +818,28 @@ class grade_report_submission extends grade_report {
                             $submissionstatus = isset($assigngrade) ? $assigngrade->submissionstatus : '-';
                             $data['submissionstatus']['class'] = $class;
                             $data['submissionstatus']['content'] = get_string('submissionstatus_' . $submissionstatus, 'assign');
+                            $gradeitemdata['submissionstatus'] = get_string('submissionstatus_' . $submissionstatus, 'assign');
                         }
 
                         // Grading status.
                         if ($this->showgradingstatus) {
                             $gradingstatus = $assignment->get_grading_status($this->user->id);
                             $data['gradingstatus']['class'] = $class;
-                            $data['gradingstatus']['content'] = get_string('markingworkflowstate' . $gradingstatus, 'assign');;
+                            if ($assignment->get_instance()->markingworkflow) {
+                                $data['gradingstatus']['content'] = get_string('markingworkflowstate' . $gradingstatus, 'assign');
+                                $gradeitemdata['gradingstatus'] = get_string('markingworkflowstate' . $gradingstatus, 'assign');
+                            } else {
+                                $data['gradingstatus']['content'] = get_string($gradingstatus, 'assign');
+                                $gradeitemdata['gradingstatus'] = get_string($gradingstatus, 'assign');
+                            }
                         }
 
                         // Date of grading.
                         if ($this->showdateofgrading) {
                             $data['dateofgrading']['class'] = $class;
                             $data['dateofgrading']['content'] = userdate($assigngrade->dategraded,
+                                get_string('strftimedatetimeshort'));
+                            $gradeitemdata['dateofgrading'] = userdate($assigngrade->dategraded,
                                 get_string('strftimedatetimeshort'));
                         }
 
@@ -857,9 +866,12 @@ class grade_report_submission extends grade_report {
                             $viewfullnames = has_capability('moodle/site:viewfullnames', $context);
                             $data['grader']['class'] = $class;
                             $data['grader']['content'] = isset($grader) ? fullname($grader, $viewfullnames) : '-';
+                            $gradeitemdata['grader'] = isset($grader) ? fullname($grader, $viewfullnames) : '-';
                         }
                     }
                 }
+
+                $this->gradeitemsdata[] = $gradeitemdata;
             }
             // We collect the aggregation hints whether they are hidden or not.
             if ($this->showcontributiontocoursetotal) {
@@ -1261,11 +1273,11 @@ class grade_report_submission extends grade_report {
                            g.grade as rawgrade,
                            g.timemodified as dategraded,
                            g.grader as grader
-                      FROM mdl_assign a
-                      JOIN mdl_assign_submission s
+                      FROM {assign} a
+                      JOIN {assign_submission} s
                            ON s.assignment = a.id
                            AND s.latest = 1
-                      JOIN mdl_assign_grades g
+                 LEFT JOIN {assign_grades} g
                            ON g.assignment = s.assignment
                            AND s.userid = g.userid
                            AND g.attemptnumber = s.attemptnumber

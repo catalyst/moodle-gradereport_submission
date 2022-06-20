@@ -440,7 +440,6 @@ class gradereport_submission_external extends external_api {
 
         // We pass userid because it can be still 0.
         list($gradeitems, $warnings) = self::get_report_data($course, $context, $user, $userid, $groupid, false);
-
         foreach ($gradeitems as $gradeitem) {
             if (isset($gradeitem['feedback']) and isset($gradeitem['feedbackformat'])) {
                 list($gradeitem['feedback'], $gradeitem['feedbackformat']) =
@@ -502,6 +501,11 @@ class gradereport_submission_external extends external_api {
                             'averageformatted' => new external_value(PARAM_NOTAGS, 'Grade average', VALUE_OPTIONAL),
                             'feedback' => new external_value(PARAM_RAW, 'Grade feedback', VALUE_OPTIONAL),
                             'feedbackformat' => new external_format_value('feedback', VALUE_OPTIONAL),
+                            'attemptnumber' => new external_value(PARAM_INT, 'Attempt number', VALUE_OPTIONAL),
+                            'submissionstatus' => new external_value(PARAM_TEXT, 'Submission status', VALUE_OPTIONAL),
+                            'gradingstatus' => new external_value(PARAM_TEXT, 'Grading status', VALUE_OPTIONAL),
+                            'dateofgrading' => new external_value(PARAM_TEXT, 'Date of grading', VALUE_OPTIONAL),
+                            'grader' => new external_value(PARAM_TEXT, 'Grader', VALUE_OPTIONAL),
                         ), 'Grade items')
                     )
                 ))
