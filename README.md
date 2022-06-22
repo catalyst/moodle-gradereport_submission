@@ -1,5 +1,7 @@
 # moodle-gradereport_submission #
 
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-gradereport_submission/ci/main?label=ci)
+
 ## What is this? ##
 
 Based on User grade report, this report has additional columns for assignment activity.
@@ -11,9 +13,9 @@ Based on User grade report, this report has additional columns for assignment ac
 
 ## Branches ##
 
-| Moodle version    | Branch |
-|-------------------|--------|
-| Moodle 3.9+       | main   |
+| Moodle version | Branch | PHP  |
+|----------------|--------|------|
+| Moodle 3.9+    | main   | 7.2+ |
 
 ## License ##
 
