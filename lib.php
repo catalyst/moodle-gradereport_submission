@@ -229,12 +229,12 @@ class grade_report_submission extends grade_report {
     /**
      * Constructor. Sets local copies of user preferences and initialises grade_tree.
      * @param int $courseid
-     * @param object $gpr grade plugin return tracking object
-     * @param string $context
+     * @param object|null $gpr grade plugin return tracking object
+     * @param object $context
      * @param int $userid The id of the user
      * @param bool $viewasuser Set this to true when the current user is a mentor/parent of the targetted user.
      */
-    public function __construct($courseid, $gpr, $context, $userid, $viewasuser = null) {
+    public function __construct(int $courseid, ?object $gpr, object $context, int $userid, ?bool $viewasuser = null) {
         global $DB, $CFG;
         parent::__construct($courseid, $gpr, $context);
 
@@ -281,14 +281,14 @@ class grade_report_submission extends grade_report {
 
         // The default grade decimals is 2.
         $defaultdecimals = 2;
-        if (property_exists($CFG, 'grade_decimalpoints')) {
+        if (!empty($CFG->grade_decimalpoints)) {
             $defaultdecimals = $CFG->grade_decimalpoints;
         }
         $this->decimals = grade_get_setting($cid, 'decimalpoints', $defaultdecimals);
 
         // The default range decimals is 0.
         $defaultrangedecimals = 0;
-        if (property_exists($CFG, 'grade_report_submission_rangedecimals')) {
+        if (!empty($CFG->grade_report_submission_rangedecimals)) {
             $defaultrangedecimals = $CFG->grade_report_submission_rangedecimals;
         }
         $this->rangedecimals = grade_get_setting($cid, 'report_submission_rangedecimals', $defaultrangedecimals);
@@ -338,7 +338,7 @@ class grade_report_submission extends grade_report {
      * @param array $element Either the top element or, during recursion, the current element
      * @return int The number of elements processed
      */
-    protected function inject_rowspans(&$element) {
+    protected function inject_rowspans(array &$element): int {
 
         if ($element['depth'] > $this->maxdepth) {
             $this->maxdepth = $element['depth'];
@@ -368,7 +368,7 @@ class grade_report_submission extends grade_report {
     /**
      * Prepares the headers and attributes of the flexitable.
      */
-    public function setup_table() {
+    public function setup_table(): void {
         /*
          * Table has 1-8 columns
          *| All columns except for itemname/description are optional
@@ -450,7 +450,7 @@ class grade_report_submission extends grade_report {
         }
     }
 
-    public function fill_table() {
+    public function fill_table(): bool {
         $this->fill_table_recursive($this->gtree->top_element);
         return true;
     }
@@ -460,7 +460,7 @@ class grade_report_submission extends grade_report {
      *
      * @param $element - An array containing the table data for the current row.
      */
-    private function fill_table_recursive(&$element) {
+    private function fill_table_recursive(array &$element) {
         global $DB, $CFG;
 
         $type = $element['type'];
@@ -965,7 +965,7 @@ class grade_report_submission extends grade_report {
      *
      * @param $element - An array containing the table data for the current row.
      */
-    public function fill_contributions_column($element) {
+    public function fill_contributions_column(array $element): void {
 
         // Recursively iterate through all child elements.
         if (isset($element['children'])) {
@@ -1050,7 +1050,7 @@ class grade_report_submission extends grade_report {
      * @param bool $return Whether or not to return the data instead of printing it directly.
      * @return string
      */
-    public function print_table($return=false) {
+    public function print_table(bool $return = false) {
          $maxspan = $this->maxdepth;
 
         // Build table structure.
@@ -1108,19 +1108,26 @@ class grade_report_submission extends grade_report {
     }
 
     /**
-     * Processes the data sent by the form (grades and feedbacks).
+     * Implement the function as the function is abstract in the parent.
      * @var array $data
-     * @return bool Success or Failure (array of errors).
+     * @return mixed True or array of errors
      */
     public function process_data($data) {
     }
+
+    /**
+     * Implement the function as the function is abstract in the parent.
+     * @param string $target Sortorder
+     * @param string $action Which action to take (edit, delete etc...)
+     * @return
+     */
     public function process_action($target, $action) {
     }
 
     /**
      * Builds the grade item averages.
      */
-    protected function calculate_averages() {
+    protected function calculate_averages(): void {
         global $USER, $DB, $CFG;
 
         if ($this->showaverage) {
@@ -1281,7 +1288,7 @@ class grade_report_submission extends grade_report {
      *
      * @since Moodle 2.9
      */
-    public function viewed() {
+    public function viewed(): void {
         $event = \gradereport_submission\event\grade_report_viewed::create(
             array(
                 'context' => $this->context,
@@ -1292,7 +1299,12 @@ class grade_report_submission extends grade_report {
         $event->trigger();
     }
 
-    protected function get_assign_grade($assignmentid) {
+    /**
+     * Get a grade record of the assignment.
+     * @param int $assignmentid
+     * @return object|null
+     */
+    protected function get_assign_grade(int $assignmentid): ?object {
         global $DB;
 
         if (is_null($this->assigngrades)) {
@@ -1325,7 +1337,12 @@ class grade_report_submission extends grade_report {
         return $this->assigngrades[$assignmentid] ?? null;
     }
 
-    protected function get_assignment($assignmentid) {
+    /**
+     * Get assign object for the assignmentid.
+     * @param $assignmentid
+     * @return assign
+     */
+    protected function get_assignment($assignmentid): assign {
         if (empty($this->assignments[$assignmentid])) {
             global $CFG, $DB;
             require_once($CFG->dirroot . '/mod/assign/locallib.php');
@@ -1576,7 +1593,8 @@ function gradereport_submission_myprofile_navigation(core_user\output\myprofile\
         }
         if ($gradeaccess) {
             $url = new moodle_url('/grade/report/submission/index.php', array('id' => $course->id, 'user' => $user->id));
-            $node = new core_user\output\myprofile\node('reports', 'submission', get_string('pluginname', 'gradereport_submission'), null, $url);
+            $node = new core_user\output\myprofile\node('reports', 'submission',
+                get_string('pluginname', 'gradereport_submission'), null, $url);
             $tree->add_node($node);
         }
     }

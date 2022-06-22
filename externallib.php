@@ -501,7 +501,7 @@ class gradereport_submission_external extends external_api {
                             'averageformatted' => new external_value(PARAM_NOTAGS, 'Grade average', VALUE_OPTIONAL),
                             'feedback' => new external_value(PARAM_RAW, 'Grade feedback', VALUE_OPTIONAL),
                             'feedbackformat' => new external_format_value('feedback', VALUE_OPTIONAL),
-                            'attemptnumber' => new external_value(PARAM_INT, 'Attempt number', VALUE_OPTIONAL),
+                            'attemptnumber' => new external_value(PARAM_TEXT, 'Attempt number', VALUE_OPTIONAL),
                             'submissionstatus' => new external_value(PARAM_TEXT, 'Submission status', VALUE_OPTIONAL),
                             'gradingstatus' => new external_value(PARAM_TEXT, 'Grading status', VALUE_OPTIONAL),
                             'dateofgrading' => new external_value(PARAM_TEXT, 'Date of grading', VALUE_OPTIONAL),

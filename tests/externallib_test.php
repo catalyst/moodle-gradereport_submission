@@ -82,7 +82,8 @@ class externallib_test extends externallib_advanced_testcase {
         $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
         $assign->testable_update_submission($submission, $student1->id, true, false);
 
-        $student1grade = array('userid' => $student1->id, 'rawgrade' => $s1grade, 'idnumber' => 'testidnumber1', 'dategraded' => time());
+        $student1grade = array('userid' => $student1->id, 'rawgrade' => $s1grade, 'idnumber' => 'testidnumber1',
+            'dategraded' => time());
         $student2grade = array('userid' => $student2->id, 'rawgrade' => $s2grade, 'idnumber' => 'testidnumber2');
         $studentgrades = array($student1->id => $student1grade, $student2->id => $student2grade);
         assign_grade_item_update($assignment, $studentgrades);
@@ -92,6 +93,8 @@ class externallib_test extends externallib_advanced_testcase {
 
     /**
      * Test get_grades_table function case teacher
+     *
+     * @covers ::get_grades_table
      */
     public function test_get_grades_table_teacher() {
 
@@ -125,6 +128,8 @@ class externallib_test extends externallib_advanced_testcase {
 
     /**
      * Test get_grades_table function case student
+     *
+     * @covers ::get_grades_table
      */
     public function test_get_grades_table_student() {
         global $CFG, $DB;
@@ -153,6 +158,8 @@ class externallib_test extends externallib_advanced_testcase {
 
     /**
      * Test get_grades_table function case incorrect permissions
+     *
+     * @covers ::get_grades_table
      */
     public function test_get_grades_table_permissions() {
         global $CFG, $DB;
@@ -176,6 +183,8 @@ class externallib_test extends externallib_advanced_testcase {
 
     /**
      * Test view_grade_report function
+     *
+     * @covers ::view_grade_report
      */
     public function test_view_grade_report() {
         global $USER;
@@ -224,6 +233,8 @@ class externallib_test extends externallib_advanced_testcase {
 
     /**
      * Test get_grades_items function case teacher
+     *
+     * @covers ::get_grade_items
      */
     public function test_get_grade_items_teacher() {
 
@@ -278,7 +289,7 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals('80.00', $studentgrades['usergrades'][0]['gradeitems'][0]['gradeformatted']);
         $this->assertEquals(0, $studentgrades['usergrades'][0]['gradeitems'][0]['grademin']);
         $this->assertEquals(100, $studentgrades['usergrades'][0]['gradeitems'][0]['grademax']);
-        $this->assertEquals('0&ndash;100', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
+        $this->assertEquals('0.00&ndash;100.00', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
         $this->assertEquals('80.00 %', $studentgrades['usergrades'][0]['gradeitems'][0]['percentageformatted']);
         $this->assertEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['feedback']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][0]['gradehiddenbydate']);
@@ -303,7 +314,7 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals(0, $studentgrades['usergrades'][0]['gradeitems'][1]['grademin']);
         $this->assertEquals(100, $studentgrades['usergrades'][0]['gradeitems'][1]['grademax']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][1]['locked']);
-        $this->assertEquals('0&ndash;100', $studentgrades['usergrades'][0]['gradeitems'][1]['rangeformatted']);
+        $this->assertEquals('0.00&ndash;100.00', $studentgrades['usergrades'][0]['gradeitems'][1]['rangeformatted']);
         $this->assertEquals('80.00 %', $studentgrades['usergrades'][0]['gradeitems'][1]['percentageformatted']);
         $this->assertEmpty($studentgrades['usergrades'][0]['gradeitems'][1]['feedback']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][1]['gradehiddenbydate']);
@@ -335,6 +346,8 @@ class externallib_test extends externallib_advanced_testcase {
 
     /**
      * Test get_grades_items function case student
+     *
+     * @covers ::get_grade_items
      */
     public function test_get_grade_items_student() {
 
@@ -386,7 +399,7 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals('80.00', $studentgrades['usergrades'][0]['gradeitems'][0]['gradeformatted']);
         $this->assertEquals(0, $studentgrades['usergrades'][0]['gradeitems'][0]['grademin']);
         $this->assertEquals(100, $studentgrades['usergrades'][0]['gradeitems'][0]['grademax']);
-        $this->assertEquals('0&ndash;100', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
+        $this->assertEquals('0.00&ndash;100.00', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
         $this->assertEquals('80.00 %', $studentgrades['usergrades'][0]['gradeitems'][0]['percentageformatted']);
         $this->assertEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['feedback']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][0]['gradehiddenbydate']);

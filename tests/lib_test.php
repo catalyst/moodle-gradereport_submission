@@ -63,6 +63,8 @@ class lib_test extends \advanced_testcase {
 
     /**
      * Tests the gradereport_submission_myprofile_navigation() function.
+     *
+     * @covers ::gradereport_submission_myprofile_navigation
      */
     public function test_gradereport_submission_myprofile_navigation() {
         $this->setAdminUser();
@@ -72,12 +74,14 @@ class lib_test extends \advanced_testcase {
         $reflector = new \ReflectionObject($this->tree);
         $nodes = $reflector->getProperty('nodes');
         $nodes->setAccessible(true);
-        $this->assertArrayHasKey('grade', $nodes->getValue($this->tree));
+        $this->assertArrayHasKey('submission', $nodes->getValue($this->tree));
     }
 
     /**
      * Tests the gradereport_submission_myprofile_navigation() function for a user
      * without permission to view the grade node.
+     *
+     * @covers ::gradereport_submission_myprofile_navigation
      */
     public function test_gradereport_submission_myprofile_navigation_without_permission() {
         $this->setUser($this->user);
@@ -87,6 +91,6 @@ class lib_test extends \advanced_testcase {
         $reflector = new \ReflectionObject($this->tree);
         $nodes = $reflector->getProperty('nodes');
         $nodes->setAccessible(true);
-        $this->assertArrayNotHasKey('grade', $nodes->getValue($this->tree));
+        $this->assertArrayNotHasKey('submission', $nodes->getValue($this->tree));
     }
 }

@@ -25,8 +25,6 @@
 
 namespace gradereport_submission\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Submission report viewed event class.
  *
@@ -41,7 +39,7 @@ class grade_report_viewed extends \core\event\grade_report_viewed {
      * Initialise the event data.
      * @return void
      */
-    protected function init() {
+    protected function init(): void {
         parent::init();
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
@@ -51,7 +49,7 @@ class grade_report_viewed extends \core\event\grade_report_viewed {
      *
      * @return string
      */
-    public static function get_name() {
+    public static function get_name(): string {
         return get_string('eventgradereportviewed', 'gradereport_submission');
     }
 
@@ -60,7 +58,7 @@ class grade_report_viewed extends \core\event\grade_report_viewed {
      *
      * Throw \coding_exception notice in case of any problems.
      */
-    protected function validate_data() {
+    protected function validate_data(): void {
         parent::validate_data();
 
         if (!isset($this->relateduserid)) {
