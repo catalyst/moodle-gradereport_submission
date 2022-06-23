@@ -108,7 +108,7 @@ class gradereport_submission_external extends external_api {
             }
         } else {
             // Check to see if groups are being used here.
-            if ($groupmode = groups_get_course_groupmode($course)) {
+            if (groups_get_course_groupmode($course)) {
                 $groupid = groups_get_course_group($course);
                 // Determine is the group is visible to user (this is particullary for the group 0).
                 if (!groups_group_visible($groupid, $course)) {
@@ -229,8 +229,6 @@ class gradereport_submission_external extends external_api {
      * @return array the grades tables
      */
     public static function get_grades_table($courseid, $userid = 0, $groupid = 0) {
-        global $CFG, $USER;
-
         list($params, $course, $context, $user, $groupid) = self::check_report_access($courseid, $userid, $groupid);
         $userid   = $params['userid'];
 
@@ -433,8 +431,6 @@ class gradereport_submission_external extends external_api {
      * @return array the grades tables
      */
     public static function get_grade_items($courseid, $userid = 0, $groupid = 0) {
-        global $CFG, $USER;
-
         list($params, $course, $context, $user, $groupid) = self::check_report_access($courseid, $userid, $groupid);
         $userid   = $params['userid'];
 

@@ -36,9 +36,17 @@
  */
 class gradereport_submission_renderer extends plugin_renderer_base {
 
+    /**
+     * Render user select box.
+     *
+     * @param $report
+     * @param $course
+     * @param $userid
+     * @param $groupid
+     * @param $includeall
+     * @return string
+     */
     public function graded_users_selector($report, $course, $userid, $groupid, $includeall) {
-        global $USER;
-
         $select = grade_get_graded_users_select($report, $course, $userid, $groupid, $includeall);
         $output = html_writer::tag('div', $this->output->render($select), array('id' => 'graded_users_selector'));
         $output .= html_writer::tag('p', '', array('style' => 'page-break-after: always;'));

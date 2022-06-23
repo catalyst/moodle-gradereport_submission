@@ -450,6 +450,11 @@ class grade_report_submission extends grade_report {
         }
     }
 
+    /**
+     * Fill the table for displaying.
+     *
+     * @return bool
+     */
     public function fill_table(): bool {
         $this->fill_table_recursive($this->gtree->top_element);
         return true;

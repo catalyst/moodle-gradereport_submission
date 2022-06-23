@@ -1,4 +1,4 @@
-@core @core_grades @gradereport_submission
+@gradereport @gradereport_submission
 Feature: View the submission report as the student will see it
   In order to know what grades students will see
   As a teacher

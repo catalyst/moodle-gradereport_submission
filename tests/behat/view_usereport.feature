@@ -1,4 +1,4 @@
-@core @core_grades @gradereport_submission
+@gradereport @gradereport_submission
 Feature: We can use the submission report
   As a user
   I browse to the Submission report
