@@ -874,10 +874,10 @@ class grade_report_submission extends grade_report {
                         // Date of grading.
                         if ($this->showdateofgrading) {
                             $dateofgrading = $assigngrade->dategraded;
-                            if (!empty($dateofgrading)) {
-                                $data['dateofgrading']['content'] = userdate($assigngrade->dategraded,
+                            if (!empty($dateofgrading) && $assigngrade->rawgrade >= 0) {
+                                $data['dateofgrading']['content'] = userdate($dateofgrading,
                                         get_string('strftimedatetimeshort'));
-                                $gradeitemdata['dateofgrading'] = userdate($assigngrade->dategraded,
+                                $gradeitemdata['dateofgrading'] = userdate($dateofgrading,
                                         get_string('strftimedatetimeshort'));
                             }
                         }
