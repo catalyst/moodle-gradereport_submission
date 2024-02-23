@@ -289,7 +289,7 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals('80.00', $studentgrades['usergrades'][0]['gradeitems'][0]['gradeformatted']);
         $this->assertEquals(0, $studentgrades['usergrades'][0]['gradeitems'][0]['grademin']);
         $this->assertEquals(100, $studentgrades['usergrades'][0]['gradeitems'][0]['grademax']);
-        $this->assertEquals('0.00&ndash;100.00', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
+        $this->assertEquals('0&ndash;100', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
         $this->assertEquals('80.00 %', $studentgrades['usergrades'][0]['gradeitems'][0]['percentageformatted']);
         $this->assertEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['feedback']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][0]['gradehiddenbydate']);
@@ -314,7 +314,7 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals(0, $studentgrades['usergrades'][0]['gradeitems'][1]['grademin']);
         $this->assertEquals(100, $studentgrades['usergrades'][0]['gradeitems'][1]['grademax']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][1]['locked']);
-        $this->assertEquals('0.00&ndash;100.00', $studentgrades['usergrades'][0]['gradeitems'][1]['rangeformatted']);
+        $this->assertEquals('0&ndash;100', $studentgrades['usergrades'][0]['gradeitems'][1]['rangeformatted']);
         $this->assertEquals('80.00 %', $studentgrades['usergrades'][0]['gradeitems'][1]['percentageformatted']);
         $this->assertEmpty($studentgrades['usergrades'][0]['gradeitems'][1]['feedback']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][1]['gradehiddenbydate']);
@@ -399,7 +399,7 @@ class externallib_test extends externallib_advanced_testcase {
         $this->assertEquals('80.00', $studentgrades['usergrades'][0]['gradeitems'][0]['gradeformatted']);
         $this->assertEquals(0, $studentgrades['usergrades'][0]['gradeitems'][0]['grademin']);
         $this->assertEquals(100, $studentgrades['usergrades'][0]['gradeitems'][0]['grademax']);
-        $this->assertEquals('0.00&ndash;100.00', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
+        $this->assertEquals('0&ndash;100', $studentgrades['usergrades'][0]['gradeitems'][0]['rangeformatted']);
         $this->assertEquals('80.00 %', $studentgrades['usergrades'][0]['gradeitems'][0]['percentageformatted']);
         $this->assertEmpty($studentgrades['usergrades'][0]['gradeitems'][0]['feedback']);
         $this->assertFalse($studentgrades['usergrades'][0]['gradeitems'][0]['gradehiddenbydate']);
